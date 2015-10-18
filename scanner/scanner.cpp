@@ -1,11 +1,33 @@
 #include "scanner.h"
 
-Scanner::Scanner()
+Scanner::Scanner(int step)
+{
+  init_data();
+  calculate_boundary(step);
+}
+
+void Scanner::init_data()
 {
 for(int i=0;i<360;i++)
   scan_data[i]=-1;
 }
 
+void Scanner::calculate_boundary(int step)
+{
+  STEP = step;
+  START = CENTER % step;
+  END = ((360 - START) / step) * step + START;
+}
+
+int Scanner::get_start()
+{
+  return START;
+}
+
+int Scanner::get_end()
+{
+ return END;
+}
 
 int Scanner::normalize(int direction)
 {
@@ -33,16 +55,16 @@ int Scanner::get_distance(int direction)
 void Scanner::rotate(int direction)
 {
   int data2[360];
-  for(int i=0;i<360;i++)
+  for(int i=START;i<END;i = i + STEP)
     data2[i]=scan_data[(i-direction)%360];
-  for(int i=0;i<360;i++)
+  for(int i=START;i<END;i = i + STEP)
     scan_data[i] = data2[i];
 }
 
 void Scanner::forward(int distance)
 {
   int k;
-  for(int i=0;i<360;i++)
+  for(int i=START;i<END;i = i + STEP)
   {
     if(0<=i && i<90)
       k = (100*i)/90;
@@ -56,15 +78,27 @@ void Scanner::forward(int distance)
   }
 }
 
+int Scanner::get_median(int direction)
+{
+  int a = get_distance(direction - STEP);
+  int b = get_distance(direction);
+  int c = get_distance(direction + STEP);
+  if (a >= b && a <= c || a <= b && a >= c) return a;
+  if (b >= a && b <= c || b <= a && b >= c) return b;
+  if (c >= a && c <= b || c <= a && c >= b) return c;
+}
+
 int Scanner::get_free_way()
 {
-  int max_dist=0;
-  int direction;
-  for(int i=0;i<360;i++)
+  int max_med=0;
+  int median;
+  int direction = 180;
+  for(int i=START;i<END;i = i + STEP)
   {
-    if (scan_data[i] > max_dist)
+    median = get_median(i);
+    if (median > max_med)
     {
-      max_dist = scan_data[i];
+      max_med = median;
       direction = i;
     }
   }
