@@ -1,9 +1,8 @@
-#include <scanner.h>
 #include <AFMotor.h>
 #include <Servo.h>
 
 /*
-Simple obstacle avoiding robot
+Control robot from Android phone via USB
 by cpro29a@gmail.com
 
 all distances are in cm
@@ -31,7 +30,6 @@ AF_DCMotor motor2(2,MOTOR12_8KHZ);
 
 #define SERVO_PIN 10
 Servo servo;
-Scanner scan(HEAD_STEP);
 
 void setup() {
   Serial.begin(115200);
@@ -56,49 +54,34 @@ void set_speed(int m1,int m2)
   motor2.setSpeed(m2);
 }
 
-void turn(int deg)
+void right()
 {
-    scan.rotate(deg);
-    if(deg>0)
-   {
-     motor1.run(FORWARD);
-     motor2.run(BACKWARD);
-   } else
-   {
-     motor1.run(BACKWARD);
-     motor2.run(FORWARD);
-   }
-   //robot turns 261 degrees
-   //per second on speed 200
-   //with opposite motor directions
-   Serial.write("Turning ");
-   Serial.print(deg);
-   Serial.write(" deg. (");
-   Serial.print(((abs(deg)*100/TURN_SPEED))*10);
-   Serial.println(" ms.)");
-   delay(((abs(deg)*100/TURN_SPEED))*10);
+    motor1.run(FORWARD);
+    motor2.run(BACKWARD);
+    set_speed(SPEED/2,SPEED/2)
 }
 
-void forward(int time)
+void left()
 {
-  scan.forward((time * 38)/1000);
+    motor1.run(BACKWARD);
+    motor2.run(FORWARD);
+    set_speed(SPEED/2,SPEED/2)
+}
+
+void forward()
+{
+  //scan.forward((time * 38)/1000);
   motor1.run(FORWARD);
   motor2.run(FORWARD);
-  Serial.write("Forward ");
-  Serial.print(time);
-  Serial.println("ms.");
-  delay(time);
+  set_speed(SPEED,SPEED)
 }
 
-void backward(int time)
+void backward()
 {
-  scan.forward(-(time * 38)/1000);
+  //scan.forward(-(time * 38)/1000);
   motor1.run(BACKWARD);
   motor2.run(BACKWARD);
-  Serial.write("Backward ");
-  Serial.print(time);
-  Serial.println("ms.");
-  delay(time);
+  set_speed(SPEED,SPEED)
 }
 
 void stop()
@@ -128,64 +111,42 @@ void turn_head(int &head_dir,
                int &head_deg)
 {
   int dist = get_distance();
-  Serial.write("Scan[");
+  Serial.write("(");
   Serial.print(head_deg);
-  Serial.write("] = ");
-  Serial.println(dist);
+  Serial.write(",");
+  Serial.print(dist);
+  Serial.write(")");
   
-  scan.set_distance(head_deg,dist);
   if(head_deg >= 180 ||
      head_deg <= 0)
      head_dir = -head_dir;
    head_deg = head_deg + head_dir;
    servo.write(head_deg);
-   delay(10);
 }
 
 void loop() {
-  int dir;
-  int dist = 100;
-  int stuck_cnt = 0;
-  int head_dir = HEAD_STEP;
-  int head_deg = CENTER;
-  set_speed(SPEED,SPEED);
+  int head_dir = 30;
+  int head_deg = 90;
   
+  set_speed(SPEED,SPEED);  
   
   while (true)
-  {      
+  {
     turn_head(head_dir, head_deg);
-    dist = scan.get_distance(90);
-    
-    //why not to blink some leds?
-    if(dist > 50)
-      digitalWrite(ledPin, HIGH);
-    else
-      digitalWrite(ledPin, LOW);
-    
-    if (dist < TURN_DISTANCE)
-    {
-       dir = scan.get_free_way();
-       turn(-(dir - 90));
-       stuck_cnt++;
-    }    
-    forward(10);
-    
-      
-    //if we are stuck
-    if(stuck_cnt > 20)
-    {
-       backward(500);
-       turn(180);
-       stuck_cnt = 0;
-    }
-    
     if (Serial.peek() != -1) {
-      Serial.print("Read: ");
-      do {
-        Serial.print((char) Serial.read());
-      } while (Serial.peek() != -1);
-      Serial.print("\n");
+      char cmd = Serial.read();
+      switch (cmd) {
+        case 'S':stop();
+                 break;
+        case 'F':forward();
+                 break;
+        case 'B':backward();
+                 break;
+        case 'L':left();
+                 break;
+        case 'R':right();
+                 break; }
     }
-    
+    delay(30);   
   } 
 }

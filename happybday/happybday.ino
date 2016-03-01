@@ -74,7 +74,7 @@ void loop() {
      lcd.clear();
      for(i=0;i<16;i++)
        { lcd.write(1); } 
-     lcd.print("Happy Birrrrrrrr8urthday!");
+     lcd.print("Happy Birthday!");
      delay(2000);
      for(i=0;i<16;i++)
        { lcd.scrollDisplayLeft();
