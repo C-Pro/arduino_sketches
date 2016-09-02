@@ -26,7 +26,7 @@ all angles are in degrees
 #define TURN_SPEED 261
 #define HEAD_STEP 20
 AF_DCMotor motor1(1,MOTOR12_8KHZ);
-AF_DCMotor motor2(4,MOTOR12_8KHZ); 
+AF_DCMotor motor2(2,MOTOR12_8KHZ); 
 
 #define SERVO_PIN 10
 Servo servo;
@@ -58,14 +58,14 @@ void right()
 {
     motor1.run(FORWARD);
     motor2.run(BACKWARD);
-    set_speed(SPEED/2,SPEED/2);
+    set_speed(SPEED/2,SPEED/2)
 }
 
 void left()
 {
     motor1.run(BACKWARD);
     motor2.run(FORWARD);
-    set_speed(SPEED/2,SPEED/2);
+    set_speed(SPEED/2,SPEED/2)
 }
 
 void forward()
@@ -73,7 +73,7 @@ void forward()
   //scan.forward((time * 38)/1000);
   motor1.run(FORWARD);
   motor2.run(FORWARD);
-  set_speed(SPEED,SPEED);
+  set_speed(SPEED,SPEED)
 }
 
 void backward()
@@ -81,7 +81,7 @@ void backward()
   //scan.forward(-(time * 38)/1000);
   motor1.run(BACKWARD);
   motor2.run(BACKWARD);
-  set_speed(SPEED,SPEED);
+  set_speed(SPEED,SPEED)
 }
 
 void stop()
